@@ -63,10 +63,10 @@ async def create_upload_file(file: UploadFile = File(...)):
     bucket = storage.bucket
     blob = bucket.blob(file.filename)
     blob.upload_from_string(file_content, content_type='image/jpeg')
-    blob.make_public
+    blob.make_public()
     
     # Get the download URL of the uploaded file
-    url = blob.generate_signed_url(expiration= 10002200)
+    url = blob.public_url
     
     # Return the download URL to the client
     return {'url': url}
