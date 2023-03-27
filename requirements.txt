@@ -37,7 +37,7 @@ pydantic==1.10.7
 PyJWT==2.6.0
 pyparsing==3.0.9
 Pyrebase4==4.6.0
-python-dotenvr
+python-dotenv
 python-jwt==2.0.1
 python-multipart==0.0.6
 requests==2.28.2
