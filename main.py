@@ -17,7 +17,7 @@ firebaseConfig = {
   "appId": "1:90293971390:web:04b27715f6059d448831ef",
   "measurementId": "G-14P2V3YKET",
   "serviceAccount": mainAccount,
-  "databaseURL":"gs://ai-sight-471fa.appspot.com"
+  "databaseURL":"gs://ai-sight-471fa.appspot.com/all_screenshots/"
 }
 
 app = FastAPI()
@@ -66,7 +66,7 @@ async def create_upload_file(file: UploadFile = File(...)):
     blob.make_public
     
     # Get the download URL of the uploaded file
-    url = blob.public_url
+    url = blob.generate_signed_url(expiration= 10002200)
     
     # Return the download URL to the client
     return {'url': url}
