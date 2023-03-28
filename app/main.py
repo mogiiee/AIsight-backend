@@ -64,20 +64,22 @@ async def create_upload_file(file: UploadFile = File(...), text_field: str = For
     blob.make_public()
     text_dict = json.loads(text_field)
     email = text_dict["email"]
+    timern = datetime.now()
 
     url = blob.public_url
     full_profile = await ops.find_user_email(email)
     user_pictures = full_profile["user-pictures"]
     url_dict = {
         "picture link": url,
-        "date and time": datetime.now
+        "date and time": timern
     }
+
     user_pictures.append(url_dict)
     ops.user_picture_updater(text_dict["email"], user_pictures)
-    return responses.response(True, "course created!", url)
+    return responses.response(True, "course created!", url_dict)
 
 
-    
+
 
 @app.post("/signup/user", tags=["user"])
 async def signup(signup_details: Request):
