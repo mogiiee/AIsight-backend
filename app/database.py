@@ -2,7 +2,7 @@ from . import exporter
 import pymongo
 
 
-cluster = pymongo.MongoClient(exporter.cluster)
+cluster = pymongo.MongoClient(exporter.real_cluster)
 
 db = cluster[exporter.db_name]
 
