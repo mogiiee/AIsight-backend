@@ -4,7 +4,7 @@ import pymongo
 
 cluster = pymongo.MongoClient(exporter.cluster)
 
-db = cluster[exporter.database]
+db = cluster[exporter.dbase]
 
 user_collection = db[exporter.collection]
 
