@@ -4,7 +4,7 @@ import pyrebase
 from fastapi.encoders import jsonable_encoder
 import firebase_admin
 from firebase_admin import credentials, storage
-import ops, responses, database
+from . import ops,responses,database
 
 
 mainAccount=  "serviceAccount.json"
@@ -66,6 +66,7 @@ async def create_upload_file(file: UploadFile = File(...)):
     
     # Return the download URL to the client
     return {'url': url}
+
 
 @app.post("/signup/user", tags=["user"])
 async def signup(signup_details: Request):
