@@ -1,4 +1,4 @@
-from . import database,responses
+from . import database, responses
 import bcrypt
 
 
@@ -7,6 +7,7 @@ async def find_user_email(email):
     if not user:
         return responses.response(False, "does not exist", email)
     return user
+
 
 async def email_finder(email):
     existing_user = database.user_collection.find_one({"email": email})
@@ -43,8 +44,10 @@ async def inserter(metadata: dict):
     return responses.response(True, "inserted successfully", metadata)
 
 
-def user_picture_updater(WrongValue,CorrectValue):
+def user_picture_updater(WrongValue, CorrectValue):
     print(CorrectValue)
     print(WrongValue)
 
-    database.user_collection.update_one({"email":WrongValue},{"$set":{"user-pictures":CorrectValue}}, upsert =True)
+    database.user_collection.update_one(
+        {"email": WrongValue}, {"$set": {"user-pictures": CorrectValue}}, upsert=True
+    )
