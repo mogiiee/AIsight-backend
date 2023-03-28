@@ -6,5 +6,5 @@ load_dotenv()
 firebase_config = os.environ.get("firebaseConfig")
 
 cluster = os.environ.get("CLUSTER")
-dbase = os.environ.get("DB")
+db_name = os.environ.get("DB")
 collection = os.environ.get("USER_COLLECTION")
