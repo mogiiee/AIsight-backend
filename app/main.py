@@ -97,13 +97,9 @@ async def signup(signup_details: Request):
 @app.post("/login", tags=["login"])
 async def login(login_deets: Request):
     infoDict = await login_deets.json()
-    print(infoDict)
     email = infoDict["email"]
     password = infoDict["password"]
-    phone_num = infoDict["phone_num"]
-    gender = infoDict["gender"]
-    height = infoDict["height"]
-    weight = infoDict["weight"]
+    
     # Verify credentials
     if await ops.verify_credentials(email, password):
         return responses.response(
@@ -111,10 +107,6 @@ async def login(login_deets: Request):
             "logged in",
             {
                 "email": email,
-                "gender": gender,
-                "phone_num": phone_num,
-                "height": height,
-                "weight": weight,
             },
         )
     else:
