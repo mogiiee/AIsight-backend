@@ -1,9 +1,11 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request
 from fastapi.middleware.cors import CORSMiddleware
 import pyrebase
-import io
+from fastapi.encoders import jsonable_encoder
 import firebase_admin
 from firebase_admin import credentials, storage
+import ops, responses, database
+
 
 mainAccount=  "serviceAccount.json"
 
@@ -50,12 +52,6 @@ def root():
     }
 
 
-# @app.post("/uploadfile/")
-# async def create_upload_file(file: UploadFile = File(...)):
-#     storage.child("picture").put(file)
-#     return {"filename": file.filename}
-
-
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile = File(...)):
     file_content = await file.read()  # Read the file's content
@@ -70,3 +66,38 @@ async def create_upload_file(file: UploadFile = File(...)):
     
     # Return the download URL to the client
     return {'url': url}
+
+@app.post("/signup/user", tags=["user"])
+async def signup(signup_details: Request):
+    infoDict = await signup_details.json()
+    print(infoDict)
+    infoDict = dict(infoDict)
+    print(infoDict)
+    # Checking if email already exists
+    email_count = database.user_collection.count_documents(
+        {"email": infoDict["email"]}
+    )
+    if email_count > 0:
+        return responses.response(False, "duplicated user, email already in use", None)
+    # Insert new user
+    encoded_password = ops.hash_password(str(infoDict["password"]))
+    infoDict['password'] = encoded_password
+    print(infoDict)
+    json_signup_details = jsonable_encoder(infoDict)
+    await ops.inserter(json_signup_details)
+    return responses.response(True, "inserted", 
+        infoDict
+    )
+
+
+@app.post("/login", tags=["login"])
+async def login(login_deets:Request):
+    infoDict = await login_deets.json()
+    print(infoDict)
+    email = infoDict['email']
+    password = infoDict['password']
+    # Verify credentials
+    if await ops.verify_credentials(email, password):
+        return responses.response(True, "logged in", {"email": email})
+    else:
+        raise HTTPException(401, "unauthorised login or email is wrong")
