@@ -41,3 +41,10 @@ async def verify_credentials(username: str, password: str) -> bool:
 async def inserter(metadata: dict):
     database.user_collection.insert_one(metadata)
     return responses.response(True, "inserted successfully", metadata)
+
+
+def user_picture_updater(WrongValue,CorrectValue):
+    print(CorrectValue)
+    print(WrongValue)
+
+    database.user_collection.update_one({"email":WrongValue},{"$set":{"user-pictures":CorrectValue}}, upsert =True)

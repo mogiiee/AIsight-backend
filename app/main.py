@@ -1,10 +1,12 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile, Request
+from fastapi import FastAPI, File, HTTPException, UploadFile, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 import pyrebase
 from fastapi.encoders import jsonable_encoder
 import firebase_admin
 from firebase_admin import credentials, storage
 from . import ops,responses,database
+import json
+from datetime import datetime
 
 
 mainAccount=  "serviceAccount.json"
@@ -53,24 +55,35 @@ def root():
 
 
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
+async def create_upload_file(file: UploadFile = File(...), text_field: str = Form(...)):
     file_content = await file.read()  # Read the file's content
     file_size = len(file_content)  # Determine the file's size
     bucket = storage.bucket
     blob = bucket.blob(file.filename)
     blob.upload_from_string(file_content, content_type='image/jpeg')
     blob.make_public()
-    
-    # Get the download URL of the uploaded file
-    url = blob.public_url
-    
-    # Return the download URL to the client
-    return {'url': url}
+    text_dict = json.loads(text_field)
+    email = text_dict["email"]
 
+    url = blob.public_url
+    full_profile = await ops.find_user_email(email)
+    user_pictures = full_profile["user-pictures"]
+    url_dict = {
+        "picture link": url,
+        "date and time": datetime.now
+    }
+    user_pictures.append(url_dict)
+    ops.user_picture_updater(text_dict["email"], user_pictures)
+    return responses.response(True, "course created!", url)
+
+
+    
 
 @app.post("/signup/user", tags=["user"])
 async def signup(signup_details: Request):
     infoDict = await signup_details.json()
+    infoDict['user-pictures'] = []
+    infoDict['results'] = []
     print(infoDict)
     infoDict = dict(infoDict)
     print(infoDict)
@@ -97,8 +110,33 @@ async def login(login_deets:Request):
     print(infoDict)
     email = infoDict['email']
     password = infoDict['password']
+    phone_num = infoDict['phone_num']
+    gender = infoDict['gender']
+    height = infoDict['height']
+    weight = infoDict['weight']
     # Verify credentials
     if await ops.verify_credentials(email, password):
-        return responses.response(True, "logged in", {"email": email})
+        return responses.response(True, "logged in",
+         {"email": email,
+         "gender": gender,
+         "phone_num": phone_num,
+         "height": height,
+         "weight": weight
+        
+        })
     else:
         raise HTTPException(401, "unauthorised login or email is wrong")
+
+
+@app.get("/find-user")
+async def find_user_email(user_deets:Request):
+    infor_dict = await user_deets.json()
+    infor_dict = dict(infor_dict)
+    email = infor_dict["email"]
+    user = database.user_collection.find_one({"email": email})
+    print(user)
+    if not user:
+        return responses.response(False, "does not exist", email)
+    del user["_id"]
+    return user
+    
